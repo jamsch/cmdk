@@ -26,6 +26,8 @@ type ItemProps = Children &
     disabled?: boolean
     /** Event handler for when this item is selected, either via click or keyboard selection. */
     onSelect?: (value: string) => void
+    /** Whether the item should be filtered by the search input */
+    shouldFilter?: boolean;
     /**
      * A unique value for this item.
      * If no value is provided, it will be inferred from `children` or the rendered `textContent`. If your `textContent` changes between renders, you _must_ provide a stable, unique `value`.
@@ -581,9 +583,12 @@ const Item = React.forwardRef<HTMLDivElement, ItemProps>((props, forwardedRef) =
 
   const store = useStore()
   const selected = useCmdk((state) => state.value && state.value === value.current)
-  const render = useCmdk((state) =>
-    context.filter() === false ? true : !state.search ? true : state.filtered.items.get(id) > 0,
-  )
+  const render = useCmdk((state) => {
+    if (!props.shouldFilter || context.filter() === false || !state.search)  {
+      return true;
+    }
+    return state.filtered.items.get(id) > 0
+  })
 
   React.useEffect(() => {
     const element = ref.current
